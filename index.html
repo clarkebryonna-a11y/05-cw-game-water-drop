@@ -3,21 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Drop Game</title>
+    <title>charity: water – Water Drop Game</title>
+    <meta name="description" content="An interactive charity: water game where players collect clean water drops, dodge contaminated drops, and race the clock to bring clean water to communities.">
+    <meta property="og:title" content="charity: water – Water Drop Game">
+    <meta property="og:description" content="An interactive charity: water game where players collect clean water drops, dodge contaminated drops, and race the clock to bring clean water to communities.">
+    <link rel="icon" type="image/png" href="img/cw_logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="game-wrapper">
-        <h1 class="game-title">Water Drop</h1>
+        <!-- charity: water Logo & Audio Controls Header -->
+        <header class="game-header">
+            <img src="img/cw_logo-horizontal.png" alt="charity: water logo" class="cw-logo" onerror="this.src='img/cw_logo.png'">
+            <div class="header-audio-controls">
+                <button id="music-toggle-btn" class="sound-toggle-btn music-toggle-btn" aria-label="Toggle Background Music" title="Turn Background Music On or Off">
+                    <span id="music-icon" class="sound-icon">🎵</span>
+                    <span id="music-label" class="sound-label">Music On</span>
+                </button>
+                <button id="sound-toggle-btn" class="sound-toggle-btn" aria-label="Toggle Sound Effects" title="Turn Sound Effects On or Off">
+                    <span id="sound-icon" class="sound-icon">🔊</span>
+                    <span id="sound-label" class="sound-label">Sound On</span>
+                </button>
+            </div>
+        </header>
+
+        <h1 class="game-title">
+            Water Drop
+            <img src="img/water-can-transparent.png" alt="Jerry can" class="title-icon">
+        </h1>
         <p class="game-tagline">Catch the good drops, avoid the bad ones!</p>
+
+        <!-- Score & Timer Panel (Synced for Solo & Dual-Player Modes) -->
         <div class="score-panel">
-            <div class="score">Score: <span id="score">0</span></div>
+            <!-- Solo Score Display (shown before game starts or in Solo mode) -->
+            <div id="solo-score-box" class="score">
+                Score: <span id="score">0</span>
+            </div>
+
+            <!-- Dual-Player Individual Score Displays (shown when Dual-Player match starts) -->
+            <div id="dual-score-box" class="dual-score-container hidden">
+                <div class="player-score-pill p1-pill">
+                    <span class="player-badge p1-badge" id="p1-panel-name">Player 1</span>
+                    <span class="player-pts" id="p1-score">0</span>
+                </div>
+                <span class="vs-divider">VS</span>
+                <div class="player-score-pill p2-pill">
+                    <span class="player-badge p2-badge" id="p2-panel-name">Player 2</span>
+                    <span class="player-pts" id="p2-score">0</span>
+                </div>
+            </div>
+
             <div class="timer">Time: <span id="time">30</span>s</div>
-            <button id="start-btn">Start Game</button>
+
+            <div class="panel-controls">
+                <button id="start-btn">Start Game</button>
+                <button id="pause-btn" class="pause-btn hidden">Pause</button>
+            </div>
         </div>
         
+        <!-- Main Game Area -->
         <div id="game-container">
+            <!-- In-Game Difficulty Bar (Appears when the game starts) -->
+            <div id="in-game-difficulty-bar" class="in-game-difficulty-bar hidden">
+                <span class="in-game-diff-label">Speed:</span>
+                <button type="button" class="in-game-diff-chip" data-difficulty="easy">🌱 Easy</button>
+                <button type="button" class="in-game-diff-chip active" data-difficulty="medium">💧 Medium</button>
+                <button type="button" class="in-game-diff-chip" data-difficulty="hard">⚡ Hard</button>
+            </div>
+
+            <!-- Split-Screen Visual Arena Divider for Dual-Player Mode (Appears when the game starts) -->
+            <div id="split-screen-zones" class="split-screen-zones hidden">
+                <div class="split-zone split-zone-p1">
+                    <div class="zone-header p1-zone-header">
+                        <span id="p1-zone-label">Player 1 Zone</span>
+                        <span class="zone-sub">Left Side Drops</span>
+                    </div>
+                </div>
+                <div class="split-divider-line"></div>
+                <div class="split-zone split-zone-p2">
+                    <div class="zone-header p2-zone-header">
+                        <span id="p2-zone-label">Player 2 Zone</span>
+                        <span class="zone-sub">Right Side Drops</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game instructions shown before starting -->
+            <div id="start-overlay" class="game-overlay">
+                <div class="overlay-card">
+                    <img src="img/water-can-transparent.png" alt="Water can" class="overlay-can">
+                    <h2>Help Bring Clean Water!</h2>
+                    <p>Click as many blue water drops as you can in 30 seconds.</p>
+                    <p class="drop-legend">
+                        <span class="legend-item"><span class="legend-dot good-dot"></span> Blue: +1 point</span>
+                        <span class="legend-item"><span class="legend-dot bad-dot"></span> Red: -1 point</span>
+                    </p>
+                    <p class="goal-text">Score <strong>20 or more</strong> to win!</p>
+                </div>
+            </div>
+
+            <!-- Match Lobby & Difficulty Overlay (Appears when "Start Game" is clicked) -->
+            <div id="lobby-modal" class="game-overlay hidden">
+                <div class="overlay-card lobby-card">
+                    <img src="img/water-can-transparent.png" alt="Water can" class="overlay-can">
+                    <h2>Match Setup &amp; Difficulty</h2>
+                    <p class="lobby-subtitle">Choose your difficulty and player mode to launch the match!</p>
+
+                    <!-- Mode Switcher Tabs -->
+                    <div class="mode-selector" role="tablist" aria-label="Game Mode">
+                        <button id="mode-dual-btn" class="mode-tab active" role="tab" aria-selected="true">
+                            👥 Dual-Player (Split-Screen)
+                        </button>
+                        <button id="mode-solo-btn" class="mode-tab" role="tab" aria-selected="false">
+                            👤 Solo Mode (1P)
+                        </button>
+                    </div>
+
+                    <!-- Dual-Player Split-Screen Match Join Cards -->
+                    <div id="dual-lobby-panel" class="dual-lobby-grid">
+                        <!-- Player 1 Slot -->
+                        <div id="p1-lobby-slot" class="player-lobby-slot p1-slot">
+                            <div class="slot-header">
+                                <span class="slot-tag p1-tag">Left Screen</span>
+                                <span id="p1-status-badge" class="slot-status waiting">Waiting...</span>
+                            </div>
+                            <input
+                                type="text"
+                                id="p1-name-input"
+                                class="player-name-input"
+                                value="Player 1"
+                                maxlength="14"
+                                aria-label="Player 1 Name"
+                            >
+                            <button id="p1-join-btn" class="join-slot-btn p1-join-btn">
+                                Join as Player 1
+                            </button>
+                        </div>
+
+                        <!-- Player 2 Slot -->
+                        <div id="p2-lobby-slot" class="player-lobby-slot p2-slot">
+                            <div class="slot-header">
+                                <span class="slot-tag p2-tag">Right Screen</span>
+                                <span id="p2-status-badge" class="slot-status waiting">Waiting...</span>
+                            </div>
+                            <input
+                                type="text"
+                                id="p2-name-input"
+                                class="player-name-input"
+                                value="Player 2"
+                                maxlength="14"
+                                aria-label="Player 2 Name"
+                            >
+                            <button id="p2-join-btn" class="join-slot-btn p2-join-btn">
+                                Join as Player 2
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Selection (Controls dropFall Animation Duration) -->
+                    <div class="difficulty-section">
+                        <div class="difficulty-header">
+                            <span class="difficulty-label">Difficulty (Fall Speed):</span>
+                            <span id="difficulty-speed-badge" class="difficulty-speed-badge">Medium • 3.0s–4.2s</span>
+                        </div>
+                        <div class="difficulty-selector" role="radiogroup" aria-label="Difficulty Selection">
+                            <button type="button" id="diff-easy-btn" class="diff-btn" data-difficulty="easy" role="radio" aria-checked="false">
+                                🌱 Easy
+                            </button>
+                            <button type="button" id="diff-medium-btn" class="diff-btn active" data-difficulty="medium" role="radio" aria-checked="true">
+                                💧 Medium
+                            </button>
+                            <button type="button" id="diff-hard-btn" class="diff-btn" data-difficulty="hard" role="radio" aria-checked="false">
+                                ⚡ Hard
+                            </button>
+                        </div>
+                    </div>
+
+                    <p id="lobby-goal-text" class="goal-text">
+                        Join Player 1 &amp; Player 2 slots — each player catches drops on their side!
+                    </p>
+                    <button id="overlay-start-btn" class="action-btn lobby-start-btn">
+                        Launch Dual Match
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pause Modal with 45-second countdown & Resume/Reset/Quit options -->
+            <div id="pause-modal" class="game-overlay hidden">
+                <div class="overlay-card pause-card">
+                    <h2 class="pause-title">Game Paused</h2>
+                    <p class="pause-prompt">Take a breather! Please choose an option within:</p>
+                    
+                    <div class="pause-timer-container">
+                        <span id="pause-countdown" class="pause-countdown">45</span>
+                        <span class="pause-seconds-label">seconds remaining</span>
+                    </div>
+
+                    <div class="pause-actions">
+                        <button id="resume-btn" class="action-btn resume-btn">Resume Game</button>
+                        <button id="reset-btn" class="action-btn reset-btn">Reset</button>
+                        <button id="quit-btn" class="action-btn quit-btn">Quit to Menu</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Over Dialog -->
+            <div id="game-over-modal" class="game-overlay hidden">
+                <div class="overlay-card modal-card">
+                    <h2 id="modal-heading">Game Over!</h2>
+                    <p id="solo-final-score-row" class="final-score-text">
+                        Final Score: <strong id="final-score">0</strong>
+                    </p>
+                    <div id="dual-final-score-row" class="dual-final-scores hidden">
+                        <div class="dual-final-box p1-final-box">
+                            <span id="p1-final-label" class="dual-final-name">Player 1</span>
+                            <strong id="p1-final-score" class="dual-final-num">0</strong>
+                        </div>
+                        <div class="dual-final-vs">VS</div>
+                        <div class="dual-final-box p2-final-box">
+                            <span id="p2-final-label" class="dual-final-name">Player 2</span>
+                            <strong id="p2-final-score" class="dual-final-num">0</strong>
+                        </div>
+                    </div>
+                    <p id="game-message" class="game-message"></p>
+
+                    <div class="top-scores-section">
+                        <h3 class="top-scores-title">🏆 Top 5 Scores</h3>
+                        <ol id="top-scores-list" class="top-scores-list"></ol>
+                    </div>
+
+                    <button id="restart-btn" class="action-btn">Play Again</button>
+                </div>
+            </div>
         </div>
+
+        <!-- Mission footer -->
+        <footer class="game-footer">
+            <p>Every drop counts. 100% of public donations fund clean water projects for people in need.</p>
+        </footer>
     </div>
     
     <script src="script.js"></script>

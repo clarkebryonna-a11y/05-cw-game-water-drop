@@ -1,0 +1,15 @@
+{
+  "name": "water-drop-game",
+  "version": "1.0.0",
+  "description": "Charity: water interactive game where players catch clean water drops and avoid bad ones.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "echo 'Build complete'",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.22.0"
+  }
+}
