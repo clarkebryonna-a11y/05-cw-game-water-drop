@@ -15,17 +15,19 @@
 </head>
 <body>
     <div class="game-wrapper">
-        <!-- charity: water Logo & Audio Controls Header -->
+        <!-- charity: water Logo & Settings Header -->
         <header class="game-header">
-            <img src="img/cw_logo-horizontal.png" alt="charity: water logo" class="cw-logo" onerror="this.src='img/cw_logo.png'">
-            <div class="header-audio-controls">
-                <button id="music-toggle-btn" class="sound-toggle-btn music-toggle-btn" aria-label="Toggle Background Music" title="Turn Background Music On or Off">
-                    <span id="music-icon" class="sound-icon">🎵</span>
-                    <span id="music-label" class="sound-label">Music On</span>
+            <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer" class="cw-logo-link" title="Visit charity: water homepage (opens in a new tab)">
+                <img src="img/cw_logo-horizontal.png" alt="charity: water logo" class="cw-logo" onerror="this.src='img/cw_logo.png'">
+            </a>
+            <div class="header-right-controls">
+                <button id="auth-btn" class="auth-btn" aria-label="Player Profile" title="Sign Up or Edit Profile">
+                    <span class="auth-icon">👤</span>
+                    <span id="auth-label" class="auth-label">Sign Up</span>
                 </button>
-                <button id="sound-toggle-btn" class="sound-toggle-btn" aria-label="Toggle Sound Effects" title="Turn Sound Effects On or Off">
-                    <span id="sound-icon" class="sound-icon">🔊</span>
-                    <span id="sound-label" class="sound-label">Sound On</span>
+                <button id="settings-btn" class="settings-btn" aria-label="Open Settings" title="Game Settings">
+                    <span class="settings-icon">⚙️</span>
+                    <span class="settings-label">Settings</span>
                 </button>
             </div>
         </header>
@@ -46,7 +48,7 @@
             <!-- Dual-Player Individual Score Displays (shown when Dual-Player match starts) -->
             <div id="dual-score-box" class="dual-score-container hidden">
                 <div class="player-score-pill p1-pill">
-                    <span class="player-badge p1-badge" id="p1-panel-name">Player 1</span>
+                    <span class="player-badge p1-badge" id="p1-panel-name">You</span>
                     <span class="player-pts" id="p1-score">0</span>
                 </div>
                 <span class="vs-divider">VS</span>
@@ -59,13 +61,15 @@
             <div class="timer">Time: <span id="time">30</span>s</div>
 
             <div class="panel-controls">
-                <button id="start-btn">Start Game</button>
                 <button id="pause-btn" class="pause-btn hidden">Pause</button>
             </div>
         </div>
         
         <!-- Main Game Area -->
-        <div id="game-container">
+        <div id="game-container" data-theme="gold-mine">
+            <!-- Dynamic Theme Background Scenery & Ambient Elements -->
+            <div id="game-scenery-layer" class="game-scenery-layer" aria-hidden="true"></div>
+
             <!-- In-Game Difficulty Bar (Appears when the game starts) -->
             <div id="in-game-difficulty-bar" class="in-game-difficulty-bar hidden">
                 <span class="in-game-diff-label">Speed:</span>
@@ -78,7 +82,7 @@
             <div id="split-screen-zones" class="split-screen-zones hidden">
                 <div class="split-zone split-zone-p1">
                     <div class="zone-header p1-zone-header">
-                        <span id="p1-zone-label">Player 1 Zone</span>
+                        <span id="p1-zone-label">You Zone</span>
                         <span class="zone-sub">Left Side Drops</span>
                     </div>
                 </div>
@@ -102,6 +106,7 @@
                         <span class="legend-item"><span class="legend-dot bad-dot"></span> Red: -1 point</span>
                     </p>
                     <p class="goal-text">Score <strong>20 or more</strong> to win!</p>
+                    <button id="start-btn" class="action-btn play-btn">Play</button>
                 </div>
             </div>
 
@@ -134,12 +139,12 @@
                                 type="text"
                                 id="p1-name-input"
                                 class="player-name-input"
-                                value="Player 1"
+                                value="You"
                                 maxlength="14"
-                                aria-label="Player 1 Name"
+                                aria-label="Your Name"
                             >
                             <button id="p1-join-btn" class="join-slot-btn p1-join-btn">
-                                Join as Player 1
+                                Join as You
                             </button>
                         </div>
 
@@ -183,11 +188,188 @@
                     </div>
 
                     <p id="lobby-goal-text" class="goal-text">
-                        Join Player 1 &amp; Player 2 slots — each player catches drops on their side!
+                        Join You &amp; Player 2 slots — each player catches drops on their side!
                     </p>
                     <button id="overlay-start-btn" class="action-btn lobby-start-btn">
                         Launch Dual Match
                     </button>
+                </div>
+            </div>
+
+            <!-- Settings Modal (Sound & Music Controls) -->
+            <div id="settings-modal" class="game-overlay hidden">
+                <div class="overlay-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+                    <div class="settings-modal-header">
+                        <h2 id="settings-title" class="settings-title">⚙️ Game &amp; Audio Settings</h2>
+                        <button id="settings-close-x-btn" class="settings-close-x" aria-label="Close Settings">✕</button>
+                    </div>
+                    <p class="settings-subtitle">Customize the game background scenery, music, and sound effects.</p>
+
+                    <!-- Background Themes Section -->
+                    <div class="settings-group">
+                        <div class="settings-group-header">
+                            <span class="settings-group-title">🎨 Game Background</span>
+                            <span id="current-theme-name" class="settings-active-badge">Gold Mine Aquifer</span>
+                        </div>
+                        <p class="settings-group-desc">Select an environment for the game arena and backdrop:</p>
+
+                        <div class="theme-options-grid" role="radiogroup" aria-label="Game Background Themes">
+                            <!-- Theme 1: Gold Mine Aquifer (Default) -->
+                            <button type="button" class="theme-option-card active" data-theme="gold-mine" role="radio" aria-checked="true" title="Select Gold Mine Aquifer">
+                                <div class="theme-thumb theme-thumb-gold-mine">
+                                    <span class="theme-thumb-icon">🪙</span>
+                                    <span class="theme-thumb-water">💧</span>
+                                </div>
+                                <div class="theme-info">
+                                    <div class="theme-name-row">
+                                        <span class="theme-name">Gold Mine Aquifer</span>
+                                        <span class="theme-tag">Default</span>
+                                    </div>
+                                    <span class="theme-desc">Subterranean gold veins, timber sluice &amp; aquifer stream</span>
+                                </div>
+                                <span class="theme-check-icon">✓</span>
+                            </button>
+
+                            <!-- Theme 2: Crystal Springs -->
+                            <button type="button" class="theme-option-card" data-theme="crystal-springs" role="radio" aria-checked="false" title="Select Crystal Springs">
+                                <div class="theme-thumb theme-thumb-crystal-springs">
+                                    <span class="theme-thumb-icon">🌿</span>
+                                    <span class="theme-thumb-water">💧</span>
+                                </div>
+                                <div class="theme-info">
+                                    <div class="theme-name-row">
+                                        <span class="theme-name">Crystal Springs</span>
+                                    </div>
+                                    <span class="theme-desc">Lush emerald moss, pure turquoise pools &amp; fresh cascade</span>
+                                </div>
+                                <span class="theme-check-icon">✓</span>
+                            </button>
+
+                            <!-- Theme 3: Deep Ocean Abyss -->
+                            <button type="button" class="theme-option-card" data-theme="deep-ocean" role="radio" aria-checked="false" title="Select Deep Ocean Abyss">
+                                <div class="theme-thumb theme-thumb-deep-ocean">
+                                    <span class="theme-thumb-icon">🌊</span>
+                                    <span class="theme-thumb-water">🫧</span>
+                                </div>
+                                <div class="theme-info">
+                                    <div class="theme-name-row">
+                                        <span class="theme-name">Deep Ocean Abyss</span>
+                                    </div>
+                                    <span class="theme-desc">Midnight sea trench, bioluminescent glow &amp; rising bubbles</span>
+                                </div>
+                                <span class="theme-check-icon">✓</span>
+                            </button>
+
+                            <!-- Theme 4: Sunset Reservoir -->
+                            <button type="button" class="theme-option-card" data-theme="sunset-reservoir" role="radio" aria-checked="false" title="Select Sunset Reservoir">
+                                <div class="theme-thumb theme-thumb-sunset-reservoir">
+                                    <span class="theme-thumb-icon">🌅</span>
+                                    <span class="theme-thumb-water">✨</span>
+                                </div>
+                                <div class="theme-info">
+                                    <div class="theme-name-row">
+                                        <span class="theme-name">Sunset Reservoir</span>
+                                    </div>
+                                    <span class="theme-desc">Golden hour twilight, calm lake reflection &amp; amber sky</span>
+                                </div>
+                                <span class="theme-check-icon">✓</span>
+                            </button>
+
+                            <!-- Theme 5: Charity Blue Horizon -->
+                            <button type="button" class="theme-option-card" data-theme="charity-blue" role="radio" aria-checked="false" title="Select Charity Blue Horizon">
+                                <div class="theme-thumb theme-thumb-charity-blue">
+                                    <span class="theme-thumb-icon">💛</span>
+                                    <span class="theme-thumb-water">💧</span>
+                                </div>
+                                <div class="theme-info">
+                                    <div class="theme-name-row">
+                                        <span class="theme-name">Charity Blue Horizon</span>
+                                    </div>
+                                    <span class="theme-desc">Signature clean water ripple rings &amp; charity: water yellow</span>
+                                </div>
+                                <span class="theme-check-icon">✓</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Audio Settings Section -->
+                    <div class="settings-group audio-group">
+                        <div class="settings-group-header">
+                            <span class="settings-group-title">🔊 Audio &amp; Sound</span>
+                        </div>
+
+                        <div class="settings-list">
+                        <!-- Background Music Control -->
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-name">Background Music</span>
+                                <span class="settings-item-desc">Ambient cavern melody &amp; bass tones</span>
+                            </div>
+                            <button id="music-toggle-btn" class="sound-toggle-btn music-toggle-btn" aria-label="Toggle Background Music" title="Turn Background Music On or Off">
+                                <span id="music-icon" class="sound-icon">🎵</span>
+                                <span id="music-label" class="sound-label">Music On</span>
+                            </button>
+                        </div>
+
+                        <!-- Sound Effects Control -->
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <span class="settings-item-name">Sound Effects</span>
+                                <span class="settings-item-desc">Drop click chimes, buzzers &amp; fanfares</span>
+                            </div>
+                            <button id="sound-toggle-btn" class="sound-toggle-btn" aria-label="Toggle Sound Effects" title="Turn Sound Effects On or Off">
+                                <span id="sound-icon" class="sound-icon">🔊</span>
+                                <span id="sound-label" class="sound-label">Sound On</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                        <button id="settings-done-btn" class="action-btn settings-done-btn">Done</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Sign Up & Profile Modal -->
+            <div id="auth-modal" class="game-overlay hidden">
+                <div class="overlay-card auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+                    <div class="auth-modal-header">
+                        <h2 id="auth-title" class="auth-title">👤 Player Sign Up</h2>
+                        <button id="auth-close-x-btn" class="auth-close-x" aria-label="Close Profile Dialog">✕</button>
+                    </div>
+                    <p id="auth-subtitle" class="auth-subtitle">New players default to &ldquo;You&rdquo;. Sign up with your username to show your profile across matches, split screens, and the top scores leaderboard!</p>
+
+                    <div id="auth-status-box" class="auth-status-box">
+                        <span class="auth-status-dot"></span>
+                        <span id="auth-status-text" class="auth-status-text">Playing as: <strong>You (Guest)</strong></span>
+                    </div>
+
+                    <form id="auth-form" class="auth-form" onsubmit="return false;">
+                        <label for="auth-username-input" class="auth-input-label">Enter Username:</label>
+                        <div class="auth-input-wrapper">
+                            <span class="auth-input-prefix">@</span>
+                            <input
+                                type="text"
+                                id="auth-username-input"
+                                class="auth-username-input"
+                                placeholder="e.g. AquaHero, SplashQueen"
+                                maxlength="14"
+                                autocomplete="off"
+                                spellcheck="false"
+                            >
+                        </div>
+                        <span id="auth-error-msg" class="auth-error-msg hidden"></span>
+
+                        <div class="auth-actions">
+                            <button type="submit" id="auth-submit-btn" class="action-btn auth-submit-btn">
+                                Save Username
+                            </button>
+                            <button type="button" id="auth-logout-btn" class="auth-logout-btn hidden">
+                                Switch back to &ldquo;You&rdquo;
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -219,7 +401,7 @@
                     </p>
                     <div id="dual-final-score-row" class="dual-final-scores hidden">
                         <div class="dual-final-box p1-final-box">
-                            <span id="p1-final-label" class="dual-final-name">Player 1</span>
+                            <span id="p1-final-label" class="dual-final-name">You</span>
                             <strong id="p1-final-score" class="dual-final-num">0</strong>
                         </div>
                         <div class="dual-final-vs">VS</div>
@@ -240,9 +422,138 @@
             </div>
         </div>
 
-        <!-- Mission footer -->
-        <footer class="game-footer">
-            <p>Every drop counts. 100% of public donations fund clean water projects for people in need.</p>
+        <!-- charity: water Impact & Donation Section -->
+        <footer class="cw-impact-footer" role="contentinfo">
+            <div class="cw-footer-accent-bar"></div>
+            
+            <div class="cw-footer-grid">
+                <!-- Left Column: Mission & Impact Badges -->
+                <div class="cw-footer-mission-col">
+                    <div class="cw-footer-brand">
+                        <img src="img/cw_logo.png" alt="charity: water" class="cw-footer-brand-logo" onerror="this.src='img/water-can-transparent.png'">
+                        <div class="cw-footer-brand-text">
+                            <span class="cw-footer-brand-title">charity: water</span>
+                            <span class="cw-footer-brand-tagline">100% of public donations fund clean water</span>
+                        </div>
+                    </div>
+
+                    <p class="cw-footer-mission-text">
+                        703 million people worldwide live without access to clean and safe drinking water. charity: water is on a mission to end the water crisis. Private donors cover all operational overhead, ensuring <strong>100% of your public donation</strong> goes straight to building sustainable water projects.
+                    </p>
+
+                    <div class="cw-impact-metrics">
+                        <div class="cw-metric-card">
+                            <span class="cw-metric-value">100%</span>
+                            <span class="cw-metric-label">Model for Public Gifts</span>
+                        </div>
+                        <div class="cw-metric-card">
+                            <span class="cw-metric-value">18.7M+</span>
+                            <span class="cw-metric-label">People Served Worldwide</span>
+                        </div>
+                        <div class="cw-metric-card">
+                            <span class="cw-metric-value">$40</span>
+                            <span class="cw-metric-label">Gives 1 Person Water for Life</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Donation Call-to-Actions & Direct Links -->
+                <div class="cw-footer-actions-col">
+                    <div class="cw-donation-card">
+                        <div class="cw-donation-header">
+                            <h3 class="cw-donation-heading">Help End the Global Water Crisis</h3>
+                            <span class="cw-donation-badge">Direct Impact</span>
+                        </div>
+                        <p class="cw-donation-subtext">
+                            Just like catching every drop in the game, real-world community action transforms lives with safe water, better health, and education.
+                        </p>
+
+                        <div class="cw-action-buttons">
+                            <a
+                                href="https://www.charitywater.org/donate"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="cw-cta-donate-btn"
+                                aria-label="Donate to charity: water (opens in a new window)"
+                            >
+                                <svg class="cw-heart-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                </svg>
+                                <span>Donate Clean Water</span>
+                                <span class="cw-btn-arrow">→</span>
+                            </a>
+
+                            <a
+                                href="https://www.charitywater.org/the-spring"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="cw-cta-spring-btn"
+                                aria-label="Join The Spring monthly giving program (opens in a new window)"
+                            >
+                                <span class="cw-spring-drop-icon">💧</span>
+                                <span>Join The Spring (Monthly Giving)</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="cw-official-links-box">
+                        <span class="cw-links-heading">Official charity: water Links:</span>
+                        <div class="cw-official-links-list">
+                            <a
+                                href="https://www.charitywater.org/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="cw-direct-link"
+                                title="charitywater.org Homepage (opens in a new window)"
+                            >
+                                <span>charitywater.org</span>
+                                <svg class="cw-external-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 17l9.2-9.2M17 17V8H8"/>
+                                </svg>
+                            </a>
+                            <span class="cw-bullet-sep">•</span>
+                            <a
+                                href="https://www.charitywater.org/our-work"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="cw-direct-link"
+                                title="Learn about charity: water's work and projects"
+                            >
+                                <span>Our Work &amp; GPS Proof</span>
+                                <svg class="cw-external-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 17l9.2-9.2M17 17V8H8"/>
+                                </svg>
+                            </a>
+                            <span class="cw-bullet-sep">•</span>
+                            <a
+                                href="https://www.charitywater.org/why-water"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="cw-direct-link"
+                                title="Why clean water matters"
+                            >
+                                <span>Why Water</span>
+                                <svg class="cw-external-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M7 17l9.2-9.2M17 17V8H8"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom Bar -->
+            <div class="cw-footer-bottom">
+                <span class="cw-tax-info">charity: water is a top-rated 501(c)(3) non-profit organization. Every drop counts.</span>
+                <a
+                    href="https://www.charitywater.org/about/financials"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="cw-financials-link"
+                >
+                    Financials &amp; Transparency ↗
+                </a>
+            </div>
         </footer>
     </div>
     

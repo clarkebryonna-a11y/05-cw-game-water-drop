@@ -15,7 +15,7 @@ const matchState = {
   difficulty: 'medium', // 'easy' | 'medium' | 'hard'
   p1Joined: false,
   p2Joined: false,
-  p1Name: 'Player 1',
+  p1Name: 'You',
   p2Name: 'Player 2',
   p1Score: 0,
   p2Score: 0,
@@ -64,7 +64,7 @@ wss.on('connection', (ws) => {
         case 'player:leave': {
           if (data.slot === 1) {
             matchState.p1Joined = false;
-            matchState.p1Name = 'Player 1';
+            matchState.p1Name = 'You';
           } else if (data.slot === 2) {
             matchState.p2Joined = false;
             matchState.p2Name = 'Player 2';
